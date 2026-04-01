@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation"
 import { headers } from "next/headers"
-import { auth } from "@/lib/auth"
+import { auth, type Session } from "@/lib/auth"
 import BottomNav from "@/components/BottomNav"
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await auth.api.getSession({ headers: await headers() }) as Session | null
   if (!session?.user) redirect("/login")
-  if ((session.user as { mustChangePassword?: boolean }).mustChangePassword) redirect("/change-password")
+  if (session.user.mustChangePassword) redirect("/change-password")
 
   return (
     <div className="min-h-screen flex flex-col pb-16">
