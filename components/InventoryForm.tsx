@@ -177,7 +177,9 @@ export default function InventoryForm({ mode, hallId, sessionId, initialItems, d
         {/* Watchman, unit and resident */}
         <div className="flex gap-3">
           <Field className="flex-1">
-            <FieldLabel htmlFor="watchmanName">Vigilante</FieldLabel>
+            <FieldLabel htmlFor="watchmanName">
+              {mode === "checkin" ? "Vigilante (check-in)" : "Vigilante (checkout)"}
+            </FieldLabel>
             <Input
               id="watchmanName"
               value={watchmanName}
@@ -196,12 +198,14 @@ export default function InventoryForm({ mode, hallId, sessionId, initialItems, d
           </Field>
         </div>
         <Field>
-          <FieldLabel htmlFor="residentName">Morador responsável</FieldLabel>
+          <FieldLabel htmlFor="residentName">
+            {mode === "checkin" ? "Morador (retirada)" : "Morador (devolução)"}
+          </FieldLabel>
           <Input
             id="residentName"
             value={residentName}
             onChange={(e) => setResidentName(e.target.value)}
-            placeholder="Nome do morador que retirou as chaves"
+            placeholder="Nome do morador responsável"
           />
         </Field>
 

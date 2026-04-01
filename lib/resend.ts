@@ -116,12 +116,12 @@ export async function sendCheckoutReport(
 <body style="font-family:sans-serif;color:#111827;max-width:600px;margin:0 auto;padding:24px">
   <h1 style="font-size:20px;margin-bottom:4px">Relatório de Uso — ${session.hall.name}</h1>
   <p style="color:#6b7280;margin:0 0 24px">
-    Responsável: <strong>${session.guard.name}</strong><br>
-    ${session.watchmanName ? `Vigilante: <strong>${session.watchmanName}</strong><br>` : ""}
     ${session.unit ? `Unidade: <strong>${session.unit}</strong><br>` : ""}
-    ${session.residentName ? `Morador responsável: <strong>${session.residentName}</strong><br>` : ""}
-    Check-in: ${formatDate(session.checkinAt)}<br>
-    Checkout: ${session.checkoutAt ? formatDate(session.checkoutAt) : "—"}
+    Check-in: ${formatDate(session.checkinAt)} — Checkout: ${session.checkoutAt ? formatDate(session.checkoutAt) : "—"}<br>
+    ${session.checkinWatchmanName ? `Vigilante (check-in): <strong>${session.checkinWatchmanName}</strong><br>` : ""}
+    ${session.checkinResidentName ? `Morador (retirada): <strong>${session.checkinResidentName}</strong><br>` : ""}
+    ${session.checkoutWatchmanName ? `Vigilante (checkout): <strong>${session.checkoutWatchmanName}</strong><br>` : ""}
+    ${session.checkoutResidentName ? `Morador (devolução): <strong>${session.checkoutResidentName}</strong><br>` : ""}
   </p>
 
   ${hasDifferences ? `<p style="color:#dc2626;font-weight:600">⚠️ Foram identificadas diferenças no inventário.</p>` : `<p style="color:#16a34a;font-weight:600">✅ Inventário sem diferenças.</p>`}

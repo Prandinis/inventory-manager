@@ -17,9 +17,9 @@ async function getGuard() {
 
 const CheckinSchema = z.object({
   hallId: z.string().min(1),
-  watchmanName: z.string().optional(),
+  checkinWatchmanName: z.string().optional(),
+  checkinResidentName: z.string().optional(),
   unit: z.string().optional(),
-  residentName: z.string().optional(),
   items: z.array(
     z.object({
       name: z.string().min(1),
@@ -51,9 +51,9 @@ export async function checkinAction(input: CheckinInput) {
       guardId: guard.id,
       status: "open",
       notes: data.notes,
-      watchmanName: data.watchmanName || null,
+      checkinWatchmanName: data.checkinWatchmanName || null,
+      checkinResidentName: data.checkinResidentName || null,
       unit: data.unit || null,
-      residentName: data.residentName || null,
       items: {
         create: data.items.map((item) => ({
           name: item.name,
@@ -85,9 +85,9 @@ export async function getLastCheckoutItems(hallId: string) {
 
 const CheckoutSchema = z.object({
   sessionId: z.string().min(1),
-  watchmanName: z.string().optional(),
+  checkoutWatchmanName: z.string().optional(),
+  checkoutResidentName: z.string().optional(),
   unit: z.string().optional(),
-  residentName: z.string().optional(),
   items: z.array(
     z.object({
       itemId: z.string().min(1),
@@ -130,9 +130,9 @@ export async function checkoutAction(input: CheckoutInput) {
       status: "closed",
       checkoutAt,
       notes: data.notes ?? session.notes,
-      watchmanName: data.watchmanName || session.watchmanName,
+      checkoutWatchmanName: data.checkoutWatchmanName || null,
+      checkoutResidentName: data.checkoutResidentName || null,
       unit: data.unit || session.unit,
-      residentName: data.residentName || session.residentName,
     },
   })
 

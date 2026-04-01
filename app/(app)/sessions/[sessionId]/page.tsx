@@ -41,22 +41,34 @@ export default async function SessionDetailPage({ params }: Props) {
             <span className="text-muted-foreground">Responsável</span>
             <span className="font-medium">{session.guard.name}</span>
           </div>
-          {session.watchmanName && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Vigilante</span>
-              <span>{session.watchmanName}</span>
-            </div>
-          )}
           {session.unit && (
             <div className="flex justify-between">
               <span className="text-muted-foreground">Unidade</span>
               <span>{session.unit}</span>
             </div>
           )}
-          {session.residentName && (
+          {session.checkinWatchmanName && (
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Morador responsável</span>
-              <span>{session.residentName}</span>
+              <span className="text-muted-foreground">Vigilante (check-in)</span>
+              <span>{session.checkinWatchmanName}</span>
+            </div>
+          )}
+          {session.checkinResidentName && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Morador (retirada)</span>
+              <span>{session.checkinResidentName}</span>
+            </div>
+          )}
+          {session.checkoutWatchmanName && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Vigilante (checkout)</span>
+              <span>{session.checkoutWatchmanName}</span>
+            </div>
+          )}
+          {session.checkoutResidentName && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Morador (devolução)</span>
+              <span>{session.checkoutResidentName}</span>
             </div>
           )}
           <div className="flex justify-between">

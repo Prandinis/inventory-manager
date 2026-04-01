@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { notFound, redirect } from "next/navigation"
+import { headers } from "next/headers"
 import { prisma } from "@/lib/prisma"
+import { auth } from "@/lib/auth"
 import { checkoutAction } from "@/actions/sessions"
 import InventoryForm from "@/components/InventoryForm"
 import type { InventoryItem } from "@/components/InventoryForm"
@@ -15,7 +17,10 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
   const { hallId } = await params
   const { session: sessionId } = await searchParams
 
-  const hall = await prisma.hall.findUnique({ where: { id: hallId, active: true } })
+  const [hall, currentSession] = await Promise.all([
+    prisma.hall.findUnique({ where: { id: hallId, active: true } }),
+    auth.api.getSession({ headers: await headers() }),
+  ])
   if (!hall) notFound()
 
   const session = await prisma.hallSession.findFirst({
@@ -37,9 +42,9 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
       sessionId: session!.id,
       items: items.map((i) => ({ itemId: i.id!, qty: i.qty })),
       notes,
-      watchmanName,
+      checkoutWatchmanName: watchmanName,
       unit,
-      residentName,
+      checkoutResidentName: residentName,
     })
   }
 
@@ -67,9 +72,9 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
         hallId={hallId}
         sessionId={session.id}
         initialItems={checkoutItems}
-        defaultWatchmanName={session.watchmanName ?? ""}
+        defaultWatchmanName={currentSession?.user.name ?? ""}
         defaultUnit={session.unit ?? ""}
-        defaultResidentName={session.residentName ?? ""}
+        defaultResidentName={session.checkinResidentName ?? ""}
         onSubmit={handleCheckout}
       />
     </div>

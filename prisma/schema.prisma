@@ -92,9 +92,11 @@ model HallSession {
   checkinAt    DateTime      @default(now())
   checkoutAt   DateTime?
   notes        String?
-  watchmanName String?
-  unit         String?
-  residentName String?
+  checkinWatchmanName  String? @map("watchmanName")
+  checkinResidentName  String? @map("residentName")
+  checkoutWatchmanName String?
+  checkoutResidentName String?
+  unit                 String?
   createdAt    DateTime      @default(now())
   items        SessionItem[]
 }
