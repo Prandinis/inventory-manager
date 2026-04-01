@@ -64,6 +64,13 @@ model Verification {
   updatedAt  DateTime?
 }
 
+model RateLimit {
+  id          String @id
+  key         String @unique
+  count       Int
+  lastRequest BigInt
+}
+
 // ─── App tables ───────────────────────────────────────────────────────────────
 
 model Hall {
