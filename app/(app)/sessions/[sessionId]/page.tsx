@@ -53,6 +53,12 @@ export default async function SessionDetailPage({ params }: Props) {
               <span>{session.unit}</span>
             </div>
           )}
+          {session.residentName && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Morador responsável</span>
+              <span>{session.residentName}</span>
+            </div>
+          )}
           <div className="flex justify-between">
             <span className="text-muted-foreground">Check-in</span>
             <span>{fmt(session.checkinAt)}</span>

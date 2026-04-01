@@ -31,7 +31,7 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
     qty: item.checkinQty,
   }))
 
-  async function handleCheckout(items: InventoryItem[], notes: string, watchmanName: string, unit: string) {
+  async function handleCheckout(items: InventoryItem[], notes: string, watchmanName: string, unit: string, residentName: string) {
     "use server"
     await checkoutAction({
       sessionId: session!.id,
@@ -39,6 +39,7 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
       notes,
       watchmanName,
       unit,
+      residentName,
     })
   }
 
@@ -68,6 +69,7 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
         initialItems={checkoutItems}
         defaultWatchmanName={session.watchmanName ?? ""}
         defaultUnit={session.unit ?? ""}
+        defaultResidentName={session.residentName ?? ""}
         onSubmit={handleCheckout}
       />
     </div>

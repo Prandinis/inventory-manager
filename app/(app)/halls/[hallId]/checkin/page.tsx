@@ -42,9 +42,9 @@ export default async function CheckinPage({ params }: Props) {
   const templateItems = await getLastCheckoutItems(hallId)
   const initialItems: InventoryItem[] = templateItems?.map((i) => ({ name: i.name, qty: i.qty })) ?? []
 
-  async function handleCheckin(items: InventoryItem[], notes: string, watchmanName: string, unit: string) {
+  async function handleCheckin(items: InventoryItem[], notes: string, watchmanName: string, unit: string, residentName: string) {
     "use server"
-    await checkinAction({ hallId, items: items.map((i) => ({ name: i.name, qty: i.qty })), notes, watchmanName, unit })
+    await checkinAction({ hallId, items: items.map((i) => ({ name: i.name, qty: i.qty })), notes, watchmanName, unit, residentName })
   }
 
   return (

@@ -21,18 +21,20 @@ type Props = {
   initialItems?: InventoryItem[]
   defaultWatchmanName?: string
   defaultUnit?: string
-  onSubmit: (items: InventoryItem[], notes: string, watchmanName: string, unit: string) => Promise<void>
+  defaultResidentName?: string
+  onSubmit: (items: InventoryItem[], notes: string, watchmanName: string, unit: string, residentName: string) => Promise<void>
 }
 
 const STORAGE_KEY = (hallId: string) => `checkin_draft_${hallId}`
 
 const PRESETS = ["Cadeiras", "Mesas", "Pratos", "Copos", "Talheres", "Talheres (facas)", "Guardanapos", "Toalhas"]
 
-export default function InventoryForm({ mode, hallId, sessionId, initialItems, defaultWatchmanName, defaultUnit, onSubmit }: Props) {
+export default function InventoryForm({ mode, hallId, sessionId, initialItems, defaultWatchmanName, defaultUnit, defaultResidentName, onSubmit }: Props) {
   const [items, setItems] = useState<InventoryItem[]>(initialItems ?? [])
   const [notes, setNotes] = useState("")
   const [watchmanName, setWatchmanName] = useState(defaultWatchmanName ?? "")
   const [unit, setUnit] = useState(defaultUnit ?? "")
+  const [residentName, setResidentName] = useState(defaultResidentName ?? "")
   const [isPending, startTransition] = useTransition()
 
   useEffect(() => {
@@ -85,7 +87,7 @@ export default function InventoryForm({ mode, hallId, sessionId, initialItems, d
 
     startTransition(async () => {
       try {
-        await onSubmit(valid, notes, watchmanName, unit)
+        await onSubmit(valid, notes, watchmanName, unit, residentName)
         if (mode === "checkin") {
           localStorage.removeItem(STORAGE_KEY(hallId))
           toast.success("Check-in registrado com sucesso")
@@ -172,7 +174,7 @@ export default function InventoryForm({ mode, hallId, sessionId, initialItems, d
           </Button>
         )}
 
-        {/* Watchman and unit */}
+        {/* Watchman, unit and resident */}
         <div className="flex gap-3">
           <Field className="flex-1">
             <FieldLabel htmlFor="watchmanName">Vigilante</FieldLabel>
@@ -193,6 +195,15 @@ export default function InventoryForm({ mode, hallId, sessionId, initialItems, d
             />
           </Field>
         </div>
+        <Field>
+          <FieldLabel htmlFor="residentName">Morador responsável</FieldLabel>
+          <Input
+            id="residentName"
+            value={residentName}
+            onChange={(e) => setResidentName(e.target.value)}
+            placeholder="Nome do morador que retirou as chaves"
+          />
+        </Field>
 
         {/* Notes */}
         <Field>

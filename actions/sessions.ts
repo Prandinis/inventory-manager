@@ -19,6 +19,7 @@ const CheckinSchema = z.object({
   hallId: z.string().min(1),
   watchmanName: z.string().optional(),
   unit: z.string().optional(),
+  residentName: z.string().optional(),
   items: z.array(
     z.object({
       name: z.string().min(1),
@@ -52,6 +53,7 @@ export async function checkinAction(input: CheckinInput) {
       notes: data.notes,
       watchmanName: data.watchmanName || null,
       unit: data.unit || null,
+      residentName: data.residentName || null,
       items: {
         create: data.items.map((item) => ({
           name: item.name,
@@ -85,6 +87,7 @@ const CheckoutSchema = z.object({
   sessionId: z.string().min(1),
   watchmanName: z.string().optional(),
   unit: z.string().optional(),
+  residentName: z.string().optional(),
   items: z.array(
     z.object({
       itemId: z.string().min(1),
@@ -129,6 +132,7 @@ export async function checkoutAction(input: CheckoutInput) {
       notes: data.notes ?? session.notes,
       watchmanName: data.watchmanName || session.watchmanName,
       unit: data.unit || session.unit,
+      residentName: data.residentName || session.residentName,
     },
   })
 

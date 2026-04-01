@@ -94,6 +94,7 @@ model HallSession {
   notes        String?
   watchmanName String?
   unit         String?
+  residentName String?
   createdAt    DateTime      @default(now())
   items        SessionItem[]
 }
