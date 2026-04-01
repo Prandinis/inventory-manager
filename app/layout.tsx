@@ -8,6 +8,7 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist" })
 export const metadata: Metadata = {
   title: "Salão de Festas",
   description: "Controle de uso dos salões de festa",
+  icons: { icon: "/favicon.ico" },
 }
 
 export const viewport: Viewport = {
