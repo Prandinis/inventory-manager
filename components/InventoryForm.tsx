@@ -1,9 +1,14 @@
 "use client"
 
 import { useState, useEffect, useTransition } from "react"
+import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 
 export type InventoryItem = {
-  id?: string   // sessionItem id (only at checkout)
+  id?: string
   name: string
   qty: number
 }
@@ -18,13 +23,13 @@ type Props = {
 
 const STORAGE_KEY = (hallId: string) => `checkin_draft_${hallId}`
 
+const PRESETS = ["Cadeiras", "Mesas", "Pratos", "Copos", "Talheres", "Talheres (facas)", "Guardanapos", "Toalhas"]
+
 export default function InventoryForm({ mode, hallId, sessionId, initialItems, onSubmit }: Props) {
   const [items, setItems] = useState<InventoryItem[]>(initialItems ?? [])
   const [notes, setNotes] = useState("")
   const [isPending, startTransition] = useTransition()
-  const [error, setError] = useState("")
 
-  // Restore draft from localStorage on checkin
   useEffect(() => {
     if (mode !== "checkin") return
     try {
@@ -37,7 +42,6 @@ export default function InventoryForm({ mode, hallId, sessionId, initialItems, o
     } catch {}
   }, [mode, hallId])
 
-  // Save draft to localStorage on change (checkin only)
   useEffect(() => {
     if (mode !== "checkin") return
     localStorage.setItem(STORAGE_KEY(hallId), JSON.stringify({ items, notes }))
@@ -59,133 +63,139 @@ export default function InventoryForm({ mode, hallId, sessionId, initialItems, o
     )
   }
 
-  const PRESETS = ["Cadeiras", "Mesas", "Pratos", "Copos", "Talheres", "Talheres (facas)", "Guardanapos", "Toalhas"]
-
   function addPreset(name: string) {
     if (items.some((i) => i.name === name)) return
     setItems((prev) => [...prev, { name, qty: 0 }])
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault()
-    setError("")
+    if (isPending) return
 
     const valid = items.filter((i) => i.name.trim())
     if (valid.length === 0) {
-      setError("Adicione pelo menos um item ao inventário")
+      toast.error("Adicione pelo menos um item ao inventário")
       return
     }
 
     startTransition(async () => {
       try {
         await onSubmit(valid, notes)
-        if (mode === "checkin") localStorage.removeItem(STORAGE_KEY(hallId))
+        if (mode === "checkin") {
+          localStorage.removeItem(STORAGE_KEY(hallId))
+          toast.success("Check-in registrado com sucesso")
+        } else {
+          toast.success("Checkout finalizado — relatório enviado")
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Erro inesperado")
+        toast.error(err instanceof Error ? err.message : "Erro inesperado")
       }
     })
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Presets */}
-      {mode === "checkin" && items.length === 0 && (
-        <div>
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-            Adicionar itens comuns
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {PRESETS.map((p) => (
-              <button
-                key={p}
-                type="button"
-                onClick={() => addPreset(p)}
-                className="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full border border-blue-200 hover:bg-blue-100 transition-colors"
-              >
-                + {p}
-              </button>
-            ))}
+    <form onSubmit={handleSubmit}>
+      <FieldGroup>
+        {/* Presets */}
+        {mode === "checkin" && items.length === 0 && (
+          <div>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+              Adicionar itens comuns
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {PRESETS.map((p) => (
+                <Button
+                  key={p}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => addPreset(p)}
+                >
+                  + {p}
+                </Button>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Items list */}
-      <div className="space-y-2">
-        {items.map((item, i) => (
-          <div key={i} className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl p-3">
-            {mode === "checkin" ? (
-              <input
-                type="text"
-                value={item.name}
-                onChange={(e) => updateItem(i, "name", e.target.value)}
-                placeholder="Nome do item"
-                className="flex-1 text-sm bg-transparent focus:outline-none"
-                required
+        {/* Items list */}
+        <div className="flex flex-col gap-2">
+          {items.map((item, i) => (
+            <div key={i} className="flex items-center gap-2">
+              {mode === "checkin" ? (
+                <Input
+                  type="text"
+                  value={item.name}
+                  onChange={(e) => updateItem(i, "name", e.target.value)}
+                  placeholder="Nome do item"
+                  className="flex-1"
+                  required
+                />
+              ) : (
+                <span className="flex-1 text-sm font-medium">{item.name}</span>
+              )}
+              <Input
+                type="number"
+                value={item.qty}
+                min={0}
+                onChange={(e) => updateItem(i, "qty", e.target.value)}
+                className="w-20 text-center"
               />
-            ) : (
-              <span className="flex-1 text-sm font-medium text-gray-900">{item.name}</span>
-            )}
-            <input
-              type="number"
-              value={item.qty}
-              min={0}
-              onChange={(e) => updateItem(i, "qty", e.target.value)}
-              className="w-20 text-center text-sm border border-gray-200 rounded-lg py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            {mode === "checkin" && (
-              <button
-                type="button"
-                onClick={() => removeItem(i)}
-                className="text-gray-400 hover:text-red-500 p-1"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
+              {mode === "checkin" && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => removeItem(i)}
+                >
+                  ✕
+                </Button>
+              )}
+            </div>
+          ))}
+        </div>
 
-      {mode === "checkin" && (
-        <button
-          type="button"
-          onClick={addItem}
-          className="w-full border-2 border-dashed border-gray-300 rounded-xl py-3 text-sm text-gray-500 hover:border-blue-400 hover:text-blue-600 transition-colors"
+        {mode === "checkin" && (
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full border-dashed"
+            onClick={addItem}
+          >
+            + Adicionar item
+          </Button>
+        )}
+
+        {/* Notes */}
+        <Field>
+          <FieldLabel htmlFor="notes">
+            Observações {mode === "checkin" ? "(opcional)" : ""}
+          </FieldLabel>
+          <Textarea
+            id="notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={3}
+            placeholder={
+              mode === "checkin"
+                ? "Ex: salão com decoração de aniversário"
+                : "Ex: faltaram 2 copos, pratos com manchas"
+            }
+          />
+        </Field>
+
+        <Button
+          type="submit"
+          disabled={isPending}
+          variant={mode === "checkout" ? "destructive" : "default"}
+          className="w-full"
+          size="lg"
         >
-          + Adicionar item
-        </button>
-      )}
-
-      {/* Notes */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Observações {mode === "checkin" ? "(opcional)" : ""}
-        </label>
-        <textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          rows={3}
-          className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-          placeholder={mode === "checkin" ? "Ex: salão com decoração de aniversário" : "Ex: faltaram 2 copos, pratos com manchas"}
-        />
-      </div>
-
-      {error && (
-        <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
-      )}
-
-      <button
-        type="submit"
-        disabled={isPending}
-        className={`w-full text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60 ${
-          mode === "checkin"
-            ? "bg-blue-700 hover:bg-blue-800"
-            : "bg-red-600 hover:bg-red-700"
-        }`}
-      >
-        {isPending
-          ? mode === "checkin" ? "Salvando check-in..." : "Finalizando checkout..."
-          : mode === "checkin" ? "Confirmar Check-in" : "Finalizar e Enviar Relatório"}
-      </button>
+          {isPending
+            ? mode === "checkin" ? "Salvando check-in..." : "Finalizando checkout..."
+            : mode === "checkin" ? "Confirmar Check-in" : "Finalizar e Enviar Relatório"}
+        </Button>
+      </FieldGroup>
     </form>
   )
 }

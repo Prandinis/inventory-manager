@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { checkoutAction } from "@/actions/sessions"
 import InventoryForm from "@/components/InventoryForm"
 import type { InventoryItem } from "@/components/InventoryForm"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 type Props = {
   params: Promise<{ hallId: string }>
@@ -27,7 +28,7 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
   const checkoutItems: InventoryItem[] = session.items.map((item) => ({
     id: item.id,
     name: item.name,
-    qty: item.checkinQty, // pre-fill with checkin quantities
+    qty: item.checkinQty,
   }))
 
   async function handleCheckout(items: InventoryItem[], notes: string) {
@@ -42,22 +43,21 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
   return (
     <div className="max-w-lg mx-auto px-4 py-6">
       <div className="flex items-center gap-2 mb-4">
-        <Link href="/dashboard" className="text-gray-400 hover:text-gray-600">
-          ←
-        </Link>
+        <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">←</Link>
         <div>
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Checkout</p>
-          <h1 className="text-xl font-bold text-gray-900">{hall.name}</h1>
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">Checkout</p>
+          <h1 className="text-xl font-bold">{hall.name}</h1>
         </div>
       </div>
 
-      <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-4 text-sm text-gray-600">
-        Check-in feito por <strong>{session.guard.name}</strong> às{" "}
-        {new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(
-          session.checkinAt,
-        )}
-        . Informe as quantidades <strong>atuais</strong> de cada item.
-      </div>
+      <Alert className="mb-4">
+        <AlertDescription>
+          Check-in feito por <strong>{session.guard.name}</strong> às{" "}
+          {new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(
+            session.checkinAt,
+          )}. Informe as quantidades <strong>atuais</strong> de cada item.
+        </AlertDescription>
+      </Alert>
 
       <InventoryForm
         mode="checkout"
