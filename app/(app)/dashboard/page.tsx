@@ -55,6 +55,7 @@ export default async function DashboardPage() {
                       {new Intl.DateTimeFormat("pt-BR", {
                         hour: "2-digit",
                         minute: "2-digit",
+                        timeZone: "America/Sao_Paulo",
                       }).format(open.checkinAt)}
                     </p>
                     <Button asChild variant="destructive" className="w-full">

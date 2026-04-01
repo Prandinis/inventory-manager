@@ -29,6 +29,7 @@ export default async function SessionsPage() {
                     {new Intl.DateTimeFormat("pt-BR", {
                       dateStyle: "short",
                       timeStyle: "short",
+                      timeZone: "America/Sao_Paulo",
                     }).format(s.checkinAt)}
                   </p>
                 </div>
