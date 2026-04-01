@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Better Auth required tables ─────────────────────────────────────────────
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean
+  image         String?
+  createdAt     DateTime
+  updatedAt     DateTime
+  role                String    @default("guard") // "admin" | "guard"
+  mustChangePassword  Boolean   @default(false)
+
+  sessions   Session[]
+  accounts   Account[]
+  hallSessions HallSession[]
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("AuthSession")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+}
+
+// ─── App tables ───────────────────────────────────────────────────────────────
+
+model Hall {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  active      Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  sessions    HallSession[]
+}
+
+model HallSession {
+  id          String        @id @default(cuid())
+  hallId      String
+  hall        Hall          @relation(fields: [hallId], references: [id])
+  guardId     String
+  guard       User          @relation(fields: [guardId], references: [id])
+  status      String        @default("open") // "open" | "closed"
+  checkinAt   DateTime      @default(now())
+  checkoutAt  DateTime?
+  notes       String?
+  createdAt   DateTime      @default(now())
+  items       SessionItem[]
+}
+
+model SessionItem {
+  id           String      @id @default(cuid())
+  sessionId    String
+  session      HallSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  name         String
+  checkinQty   Int
+  checkoutQty  Int?
+  createdAt    DateTime    @default(now())
+}
+
+model ReportEmail {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
