@@ -116,7 +116,10 @@ export async function sendCheckoutReport(
 <body style="font-family:sans-serif;color:#111827;max-width:600px;margin:0 auto;padding:24px">
   <h1 style="font-size:20px;margin-bottom:4px">Relatório de Uso — ${session.hall.name}</h1>
   <p style="color:#6b7280;margin:0 0 24px">
-    Vigilante: <strong>${session.guard.name}</strong><br>
+    Responsável: <strong>${session.guard.name}</strong><br>
+    ${session.watchmanName ? `Vigilante: <strong>${session.watchmanName}</strong><br>` : ""}
+    ${session.unit ? `Unidade: <strong>${session.unit}</strong><br>` : ""}
+    ${session.residentName ? `Morador responsável: <strong>${session.residentName}</strong><br>` : ""}
     Check-in: ${formatDate(session.checkinAt)}<br>
     Checkout: ${session.checkoutAt ? formatDate(session.checkoutAt) : "—"}
   </p>
