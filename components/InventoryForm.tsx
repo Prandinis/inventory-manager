@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useTransition } from "react"
+import { unstable_rethrow } from "next/navigation"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,16 +19,20 @@ type Props = {
   hallId: string
   sessionId?: string
   initialItems?: InventoryItem[]
-  onSubmit: (items: InventoryItem[], notes: string) => Promise<void>
+  defaultWatchmanName?: string
+  defaultUnit?: string
+  onSubmit: (items: InventoryItem[], notes: string, watchmanName: string, unit: string) => Promise<void>
 }
 
 const STORAGE_KEY = (hallId: string) => `checkin_draft_${hallId}`
 
 const PRESETS = ["Cadeiras", "Mesas", "Pratos", "Copos", "Talheres", "Talheres (facas)", "Guardanapos", "Toalhas"]
 
-export default function InventoryForm({ mode, hallId, sessionId, initialItems, onSubmit }: Props) {
+export default function InventoryForm({ mode, hallId, sessionId, initialItems, defaultWatchmanName, defaultUnit, onSubmit }: Props) {
   const [items, setItems] = useState<InventoryItem[]>(initialItems ?? [])
   const [notes, setNotes] = useState("")
+  const [watchmanName, setWatchmanName] = useState(defaultWatchmanName ?? "")
+  const [unit, setUnit] = useState(defaultUnit ?? "")
   const [isPending, startTransition] = useTransition()
 
   useEffect(() => {
@@ -80,7 +85,7 @@ export default function InventoryForm({ mode, hallId, sessionId, initialItems, o
 
     startTransition(async () => {
       try {
-        await onSubmit(valid, notes)
+        await onSubmit(valid, notes, watchmanName, unit)
         if (mode === "checkin") {
           localStorage.removeItem(STORAGE_KEY(hallId))
           toast.success("Check-in registrado com sucesso")
@@ -88,6 +93,7 @@ export default function InventoryForm({ mode, hallId, sessionId, initialItems, o
           toast.success("Checkout finalizado — relatório enviado")
         }
       } catch (err) {
+        unstable_rethrow(err)
         toast.error(err instanceof Error ? err.message : "Erro inesperado")
       }
     })
@@ -165,6 +171,28 @@ export default function InventoryForm({ mode, hallId, sessionId, initialItems, o
             + Adicionar item
           </Button>
         )}
+
+        {/* Watchman and unit */}
+        <div className="flex gap-3">
+          <Field className="flex-1">
+            <FieldLabel htmlFor="watchmanName">Vigilante</FieldLabel>
+            <Input
+              id="watchmanName"
+              value={watchmanName}
+              onChange={(e) => setWatchmanName(e.target.value)}
+              placeholder="Nome do vigilante"
+            />
+          </Field>
+          <Field className="w-36">
+            <FieldLabel htmlFor="unit">Unidade</FieldLabel>
+            <Input
+              id="unit"
+              value={unit}
+              onChange={(e) => setUnit(e.target.value)}
+              placeholder="Ex: Bloco A"
+            />
+          </Field>
+        </div>
 
         {/* Notes */}
         <Field>

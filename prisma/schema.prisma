@@ -83,17 +83,19 @@ model Hall {
 }
 
 model HallSession {
-  id          String        @id @default(cuid())
-  hallId      String
-  hall        Hall          @relation(fields: [hallId], references: [id])
-  guardId     String
-  guard       User          @relation(fields: [guardId], references: [id])
-  status      String        @default("open") // "open" | "closed"
-  checkinAt   DateTime      @default(now())
-  checkoutAt  DateTime?
-  notes       String?
-  createdAt   DateTime      @default(now())
-  items       SessionItem[]
+  id           String        @id @default(cuid())
+  hallId       String
+  hall         Hall          @relation(fields: [hallId], references: [id])
+  guardId      String
+  guard        User          @relation(fields: [guardId], references: [id])
+  status       String        @default("open") // "open" | "closed"
+  checkinAt    DateTime      @default(now())
+  checkoutAt   DateTime?
+  notes        String?
+  watchmanName String?
+  unit         String?
+  createdAt    DateTime      @default(now())
+  items        SessionItem[]
 }
 
 model SessionItem {

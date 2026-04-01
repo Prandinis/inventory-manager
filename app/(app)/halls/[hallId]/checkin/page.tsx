@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import { headers } from "next/headers"
 import { prisma } from "@/lib/prisma"
+import { auth } from "@/lib/auth"
 import { getLastCheckoutItems, checkinAction } from "@/actions/sessions"
 import InventoryForm from "@/components/InventoryForm"
 import type { InventoryItem } from "@/components/InventoryForm"
@@ -11,7 +13,10 @@ type Props = { params: Promise<{ hallId: string }> }
 
 export default async function CheckinPage({ params }: Props) {
   const { hallId } = await params
-  const hall = await prisma.hall.findUnique({ where: { id: hallId, active: true } })
+  const [hall, session] = await Promise.all([
+    prisma.hall.findUnique({ where: { id: hallId, active: true } }),
+    auth.api.getSession({ headers: await headers() }),
+  ])
   if (!hall) notFound()
 
   const openSession = await prisma.hallSession.findFirst({
@@ -37,9 +42,9 @@ export default async function CheckinPage({ params }: Props) {
   const templateItems = await getLastCheckoutItems(hallId)
   const initialItems: InventoryItem[] = templateItems?.map((i) => ({ name: i.name, qty: i.qty })) ?? []
 
-  async function handleCheckin(items: InventoryItem[], notes: string) {
+  async function handleCheckin(items: InventoryItem[], notes: string, watchmanName: string, unit: string) {
     "use server"
-    await checkinAction({ hallId, items: items.map((i) => ({ name: i.name, qty: i.qty })), notes })
+    await checkinAction({ hallId, items: items.map((i) => ({ name: i.name, qty: i.qty })), notes, watchmanName, unit })
   }
 
   return (
@@ -64,6 +69,7 @@ export default async function CheckinPage({ params }: Props) {
         mode="checkin"
         hallId={hallId}
         initialItems={initialItems}
+        defaultWatchmanName={session?.user.name ?? ""}
         onSubmit={handleCheckin}
       />
     </div>

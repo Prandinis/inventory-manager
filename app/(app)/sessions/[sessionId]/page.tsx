@@ -22,7 +22,7 @@ export default async function SessionDetailPage({ params }: Props) {
 
   const fmt = (date: Date | null) =>
     date
-      ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(date)
+      ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(date)
       : "—"
 
   return (
@@ -38,9 +38,21 @@ export default async function SessionDetailPage({ params }: Props) {
       <Card className="mb-4">
         <CardContent className="flex flex-col gap-2 py-4 text-sm">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Vigilante</span>
+            <span className="text-muted-foreground">Responsável</span>
             <span className="font-medium">{session.guard.name}</span>
           </div>
+          {session.watchmanName && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Vigilante</span>
+              <span>{session.watchmanName}</span>
+            </div>
+          )}
+          {session.unit && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Unidade</span>
+              <span>{session.unit}</span>
+            </div>
+          )}
           <div className="flex justify-between">
             <span className="text-muted-foreground">Check-in</span>
             <span>{fmt(session.checkinAt)}</span>

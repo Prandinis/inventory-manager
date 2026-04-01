@@ -31,12 +31,14 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
     qty: item.checkinQty,
   }))
 
-  async function handleCheckout(items: InventoryItem[], notes: string) {
+  async function handleCheckout(items: InventoryItem[], notes: string, watchmanName: string, unit: string) {
     "use server"
     await checkoutAction({
       sessionId: session!.id,
       items: items.map((i) => ({ itemId: i.id!, qty: i.qty })),
       notes,
+      watchmanName,
+      unit,
     })
   }
 
@@ -53,7 +55,7 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
       <Alert className="mb-4">
         <AlertDescription>
           Check-in feito por <strong>{session.guard.name}</strong> às{" "}
-          {new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(
+          {new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" }).format(
             session.checkinAt,
           )}. Informe as quantidades <strong>atuais</strong> de cada item.
         </AlertDescription>
@@ -64,6 +66,8 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
         hallId={hallId}
         sessionId={session.id}
         initialItems={checkoutItems}
+        defaultWatchmanName={session.watchmanName ?? ""}
+        defaultUnit={session.unit ?? ""}
         onSubmit={handleCheckout}
       />
     </div>
