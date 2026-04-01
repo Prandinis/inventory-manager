@@ -1,7 +1,7 @@
 import { Resend } from "resend"
 import type { HallSession, SessionItem, Hall, User } from "@prisma/client"
 
-export const resend = new Resend(process.env.RESEND_API_KEY)
+const getResend = () => new Resend(process.env.RESEND_API_KEY)
 
 const FROM = process.env.REPORT_FROM_EMAIL ?? "relatorios@seudominio.com"
 
@@ -16,7 +16,7 @@ const formatDate = (date: Date) =>
 
 export async function sendWelcomeEmail(to: string, name: string, tempPassword: string) {
   const appUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:3000"
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM,
     to,
     subject: "Bem-vindo ao Sistema de Controle de Salões",
@@ -47,7 +47,7 @@ export async function sendWelcomeEmail(to: string, name: string, tempPassword: s
 // ─── Password reset email ──────────────────────────────────────────────────────
 
 export async function sendPasswordResetEmail(to: string, name: string, url: string) {
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM,
     to,
     subject: "Redefinição de senha",
@@ -143,7 +143,7 @@ export async function sendCheckoutReport(
 </body>
 </html>`
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM,
     to: recipientEmails,
     subject: `Checkout — ${session.hall.name} — ${formatDate(session.checkoutAt ?? new Date())}`,
